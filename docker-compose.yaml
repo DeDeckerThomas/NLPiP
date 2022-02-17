@@ -1,0 +1,81 @@
+#
+# This Docker compose file is for local testing
+#
+
+version: "3.9"
+services:
+  baseline:
+    image: thomasdedecker/fastapi_transformer_baseline
+    container_name: fastapi-baseline
+    build:
+      context: ./FastAPI-transformer-baseline
+      dockerfile: Dockerfile
+    env_file:
+      - ./FastAPI-transformer-baseline/.env
+    ports:
+      - "8080:80"
+
+  optimized-cpu:
+    image: thomasdedecker/triton_server_for_optimized_transformers:latest
+    build:
+      context: ./triton-backend-files
+      dockerfile: Dockerfile
+    shm_size: '1gb'
+    entrypoint: tritonserver --model-repository=/models
+    container_name: optimized-cpu
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+    volumes:
+      - "./cpu-optimized-transformer/models_repository:/models"
+
+  optimized-gpu:
+    image: thomasdedecker/triton_server_for_optimized_transformers:latest
+    build:
+      context: ./triton-backend-files
+      dockerfile: Dockerfile
+    shm_size: '1gb'
+    entrypoint: tritonserver --model-repository=/models
+    container_name: optimized-gpu
+    ports:
+      - "8003:8000"
+      - "8004:8001"
+      - "8005:8002"
+    volumes:
+      - "./gpu-optimized-transformer/models_repository:/models"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+
+  fastapi-benchmark:
+    image: thomasdedecker/fastapi_benchmark:latest
+    container_name: fastapi-benchmark
+    build:
+      context: ./fastapi-benchmark
+      dockerfile: Dockerfile
+    env_file:
+      - ./fastapi-benchmark/.env
+    ports:
+      - "8081:80"
+  # 
+  # This service is responsible for testing on GPU with the notebook.
+  #
+  # nvidia-sdk:
+  #   image: nvcr.io/nvidia/tritonserver:22.01-py3-sdk
+  #   container_name: nvidia-sdk
+  #   volumes:
+  #     - "./gpu-optimized-transformer/notebooks:/notebooks"
+
+  #   entrypoint: sleep 4515241645165
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]

@@ -1,0 +1,6 @@
+-f https://download.pytorch.org/whl/cpu/torch_stable.html
+fastapi==0.71.0
+uvicorn[standard]==0.16.0
+torch==1.10.1+cpu 
+transformers==4.15.0
+python-dotenv==0.19.2

@@ -1,0 +1,31 @@
+name: "fast-gpu-postprocess"
+backend: "python"
+max_batch_size: 0
+
+input [
+    {
+        name: "output"
+        data_type: TYPE_FP32
+        dims: [ -1, 2 ]
+    }
+]
+
+output [
+    {
+        name: "label"
+        data_type: TYPE_STRING
+        dims: [ -1 ]
+    },
+    {
+        name: "score"
+        data_type: TYPE_FP32
+        dims: [ -1 ]
+    }
+]
+
+instance_group [
+    {
+      count: 1
+      kind: KIND_CPU
+    }
+]

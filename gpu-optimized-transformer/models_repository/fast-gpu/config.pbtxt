@@ -1,0 +1,86 @@
+name: "fast-gpu"
+max_batch_size: 0
+platform: "ensemble"
+
+input [
+    {
+        name: "text"
+        data_type: TYPE_STRING
+        dims: [ -1 ]
+    }
+]
+
+output [
+    {
+        name: "label"
+        data_type: TYPE_STRING
+        dims: [ -1 ]
+    },
+    {
+        name: "score"
+        data_type: TYPE_FP32
+        dims: [ -1 ]
+    }
+]
+
+ensemble_scheduling {
+    step [
+        {
+            model_name: "fast-gpu-tokenize"
+            model_version: -1
+            input_map {
+                key: "text"
+                value: "text"
+            }
+            output_map [
+                {
+                    key: "input_ids"
+                    value: "input_ids"
+                },
+                
+                {
+                    key: "attention_mask"
+                    value: "attention_mask"
+                }
+            ]
+        },
+        {
+            model_name: "fast-gpu-model"
+            model_version: -1
+            input_map [
+                {
+                    key: "input_ids"
+                    value: "input_ids"
+                },
+                
+                {
+                    key: "attention_mask"
+                    value: "attention_mask"
+                }
+            ]
+            output_map {
+                key: "output"
+                value: "output"
+            }
+        },
+        {
+            model_name: "fast-gpu-postprocess"
+            model_version: -1
+            input_map {
+                key: "output"
+                value: "output"
+            }
+            output_map [
+                {
+                    key: "label"
+                    value: "label"
+                },
+                
+                {
+                    key: "score"
+                    value: "score"
+                }
+            ]
+        }
+    ]
+}

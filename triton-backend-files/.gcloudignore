@@ -1,0 +1,5 @@
+deploy/
+models/
+docker-compose.yaml
+README.md
+singe_request.py
